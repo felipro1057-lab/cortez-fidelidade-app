@@ -1,646 +1,842 @@
-const STORAGE_KEY = 'cortez_fidelity_customers_v1';
-const ADMIN_PIN = '1234';
-const MAX_STAMPS = 10;
+* {
+  box-sizing: border-box;
+}
 
-const initialCustomers = [
-  {
-    id: '1',
-    name: 'João Silva',
-    phone: '88999998888',
-    address: 'Rua das Flores, 123 - Centro',
-    gasStamps: 7,
-    waterStamps: 9,
-    history: [
-      { type: 'gas', action: 'add', count: 1, date: '10/05/2024 - 14:30' },
-      { type: 'water', action: 'add', count: 2, date: '12/05/2024 - 09:15' }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Maria Oliveira',
-    phone: '88988887777',
-    address: 'Av. Principal, 456 - Bairro Novo',
-    gasStamps: 10,
-    waterStamps: 3,
-    history: [
-      { type: 'gas', action: 'add', count: 10, date: '01/05/2024 - 11:00' }
-    ]
+:root {
+  --bg: #edf3fb;
+  --panel: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #dbe4f0;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #dfeaff;
+  --amber: #f59e0b;
+  --amber-dark: #d97706;
+  --amber-soft: #fff4db;
+  --cyan: #06b6d4;
+  --cyan-soft: #dff9ff;
+  --green: #10b981;
+  --green-soft: #dcfce7;
+  --red: #ef4444;
+  --red-soft: #fee2e2;
+  --shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: linear-gradient(180deg, #eff6ff 0%, #edf3fb 100%);
+  color: var(--text);
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.app-shell {
+  width: min(100%, 480px);
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.topbar {
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 48%, #f59e0b 100%);
+  color: white;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 22px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+}
+
+.brand-wrap h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  font-weight: 800;
+}
+
+.brand-wrap p {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ghost-btn,
+.toolbar-btn,
+.panel-action {
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+.ghost-btn {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+}
+
+.toolbar-btn,
+.panel-action {
+  background: rgba(255,255,255,0.18);
+  color: #0f172a;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.main-panel {
+  position: relative;
+  flex: 1;
+  padding: 20px;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf3fb 100%);
+}
+
+.view {
+  display: none;
+  gap: 18px;
+}
+
+.view.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-card {
+  background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(245,158,11,0.18));
+  border: 1px solid rgba(37,99,235,0.12);
+  border-radius: 20px;
+  padding: 18px 18px 20px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37,99,235,0.12);
+  color: var(--blue-dark);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero-card h2 {
+  margin: 12px 0 8px;
+  font-size: clamp(1.7rem, 2vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.hero-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mini-stat {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.mini-stat span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.mini-stat strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.accent-gas strong {
+  color: #c2410c;
+}
+
+.accent-water strong {
+  color: #0369a1;
+}
+
+.panel-box,
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.03);
+  border-radius: 20px;
+}
+
+.panel-box {
+  padding: 18px;
+}
+
+.customer-box {
+  background: #f8fbff;
+}
+
+.admin-box {
+  background: #fffaf0;
+  border-color: rgba(245,158,11,0.25);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.panel-title.compact {
+  margin-bottom: 12px;
+}
+
+.panel-title h3,
+.customer-details-header h3,
+.admin-banner h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.icon.blue {
+  background: var(--blue-soft);
+}
+
+.icon.amber {
+  background: var(--amber-soft);
+  color: var(--amber-dark);
+}
+
+.icon.grey {
+  background: #e2e8f0;
+}
+
+.stack-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+input {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  padding: 14px 14px;
+  font-size: 0.98rem;
+  color: var(--text);
+  outline: none;
+}
+
+input:focus {
+  border-color: rgba(37,99,235,0.6);
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+}
+
+.primary-btn,
+.secondary-btn,
+.whatsapp-btn,
+.add-btn,
+.redeem-btn,
+.danger-btn,
+.panel-action {
+  border: none;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  color: white;
+  box-shadow: 0 12px 22px rgba(37,99,235,0.18);
+}
+
+.secondary-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 12px 22px rgba(245,158,11,0.18);
+}
+
+.wide-btn {
+  width: 100%;
+}
+
+.error-message {
+  color: var(--red);
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  border-radius: 22px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 18px 28px rgba(15,23,42,0.12);
+}
+
+.welcome-card p {
+  margin: 0;
+  color: rgba(255,255,255,0.72);
+  font-size: 0.78rem;
+}
+
+.welcome-card h2 {
+  margin: 6px 0 10px;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+.address-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.8);
+}
+
+.address-row p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.card {
+  padding: 18px;
+}
+
+.loyalty-card {
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.loyalty-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 36%);
+  pointer-events: none;
+}
+
+.gas-card {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+}
+
+.water-card {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.tag {
+  display: inline-flex;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.card-header h3 {
+  margin: 10px 0 0;
+  font-size: 1.8rem;
+  line-height: 1.1;
+}
+
+.card-icon {
+  font-size: 2rem;
+  opacity: 0.85;
+}
+
+.card-copy {
+  position: relative;
+  z-index: 1;
+  margin: 14px 0 18px;
+  color: rgba(255,255,255,0.88);
+  font-size: 0.8rem;
+}
+
+.stamps-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.stamp-box {
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  transition: 0.2s ease;
+}
+
+.stamp-box.active {
+  background: rgba(255,255,255,0.96);
+  color: #0f172a;
+  box-shadow: 0 8px 18px rgba(15,23,42,0.12);
+}
+
+.gas-card .stamp-box.active {
+  color: #c2410c;
+}
+
+.water-card .stamp-box.active {
+  color: #0369a1;
+}
+
+.stamp-box.empty {
+  background: rgba(15,23,42,0.16);
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.stamp-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.reward-badge {
+  background: rgba(255,255,255,0.94);
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: inherit;
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gas-card .reward-badge {
+  color: #c2410c;
+}
+
+.water-card .reward-badge {
+  color: #0369a1;
+}
+
+.whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 14px 24px rgba(16,185,129,0.2);
+}
+
+.history-card {
+  background: #f8fafc;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+}
+
+.history-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.history-date {
+  font-size: 0.67rem;
+  color: var(--muted);
+}
+
+.admin-banner {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.02));
+  border: 1px solid rgba(245,158,11,0.15);
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.stat-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.stat-card.gas strong {
+  color: #c2410c;
+}
+
+.stat-card.water strong {
+  color: #0369a1;
+}
+
+.stat-card.prize strong {
+  color: #0f766e;
+}
+
+.admin-section {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.section-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#searchCustomerInput {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.customer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 250px;
+  overflow: auto;
+}
+
+.customer-item {
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.customer-item.active {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.customer-main p,
+.customer-main strong {
+  margin: 0;
+}
+
+.customer-main strong {
+  font-size: 0.92rem;
+}
+
+.customer-main span {
+  display: block;
+  font-size: 0.64rem;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.customer-status {
+  font-size: 0.68rem;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.customer-control {
+  padding: 18px;
+}
+
+.customer-details-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.customer-details-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.mini-tag {
+  display: inline-block;
+  color: var(--amber-dark);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.danger-btn {
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 0.74rem;
+}
+
+.control-section {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  padding-top: 16px;
+  margin-top: 14px;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.stamp-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.gas-name {
+  color: #c2410c;
+}
+
+.water-name {
+  color: #0369a1;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.add-btn {
+  font-size: 0.74rem;
+  padding: 11px 10px;
+  font-weight: 800;
+}
+
+.gas-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1f2937;
+}
+
+.water-btn {
+  background: linear-gradient(135deg, #67e8f9 0%, #06b6d4 100%);
+  color: #082f49;
+}
+
+.redeem-btn {
+  background: rgba(239,68,68,0.08);
+  color: #b91c1c;
+  border: 1px solid rgba(239,68,68,0.12);
+  font-size: 0.73rem;
+}
+
+.register-card {
+  background: #f8fafc;
+}
+
+.compact-form {
+  gap: 10px;
+}
+
+.toolbar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.panel-action {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.panel-action.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.footer {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.7rem;
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 23, 42, 0.95);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s ease;
+  z-index: 50;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 420px) {
+  body {
+    padding: 0;
   }
-];
 
-const state = {
-  view: 'login',
-  customers: loadCustomers(),
-  currentCustomer: null,
-  selectedAdminCustomer: null,
-  searchTerm: ''
-};
-
-const els = {
-  loginView: document.getElementById('loginView'),
-  clientView: document.getElementById('clientView'),
-  adminView: document.getElementById('adminView'),
-  logoutBtn: document.getElementById('logoutBtn'),
-  clientLoginForm: document.getElementById('clientLoginForm'),
-  phoneInput: document.getElementById('phoneInput'),
-  adminLoginForm: document.getElementById('adminLoginForm'),
-  adminPinInput: document.getElementById('adminPinInput'),
-  pinError: document.getElementById('pinError'),
-  clientName: document.getElementById('clientName'),
-  clientAddress: document.getElementById('clientAddress'),
-  gasStamps: document.getElementById('gasStamps'),
-  waterStamps: document.getElementById('waterStamps'),
-  gasProgressText: document.getElementById('gasProgressText'),
-  gasRewardBadge: document.getElementById('gasRewardBadge'),
-  waterProgressText: document.getElementById('waterProgressText'),
-  waterRewardBadge: document.getElementById('waterRewardBadge'),
-  historyList: document.getElementById('historyList'),
-  whatsappLink: document.getElementById('whatsappLink'),
-  searchCustomerInput: document.getElementById('searchCustomerInput'),
-  customerList: document.getElementById('customerList'),
-  adminCustomerPanel: document.getElementById('adminCustomerPanel'),
-  selectedCustomerName: document.getElementById('selectedCustomerName'),
-  selectedCustomerPhone: document.getElementById('selectedCustomerPhone'),
-  selectedGasValue: document.getElementById('selectedGasValue'),
-  selectedWaterValue: document.getElementById('selectedWaterValue'),
-  deleteCustomerBtn: document.getElementById('deleteCustomerBtn'),
-  createCustomerForm: document.getElementById('createCustomerForm'),
-  newCustomerName: document.getElementById('newCustomerName'),
-  newCustomerPhone: document.getElementById('newCustomerPhone'),
-  newCustomerAddress: document.getElementById('newCustomerAddress'),
-  statClients: document.getElementById('statClients'),
-  statGas: document.getElementById('statGas'),
-  statWater: document.getElementById('statWater'),
-  statPrizes: document.getElementById('statPrizes')
-};
-
-initialize();
-
-function initialize() {
-  bindEvents();
-  render();
-}
-
-function bindEvents() {
-  els.clientLoginForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    handleClientLogin();
-  });
-
-  els.adminLoginForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    handleAdminLogin();
-  });
-
-  els.logoutBtn.addEventListener('click', () => {
-    state.currentCustomer = null;
-    state.selectedAdminCustomer = null;
-    setView('login');
-  });
-
-  els.searchCustomerInput.addEventListener('input', (event) => {
-    state.searchTerm = event.target.value.trim();
-    renderCustomerList();
-  });
-
-  document.querySelectorAll('[data-type]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const type = button.dataset.type;
-      const amount = Number(button.dataset.amount || 0);
-      handleUpdateStamps(type, amount);
-    });
-  });
-
-  els.deleteCustomerBtn.addEventListener('click', () => {
-    if (!state.selectedAdminCustomer) return;
-
-    const confirmed = window.confirm(
-      `Deseja excluir o cliente ${state.selectedAdminCustomer.name}?`
-    );
-
-    if (!confirmed) return;
-
-    state.customers = state.customers.filter(
-      (customer) => customer.id !== state.selectedAdminCustomer.id
-    );
-
-    persistCustomers();
-    state.selectedAdminCustomer = null;
-    render();
-  });
-
-  els.createCustomerForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    handleCreateCustomer();
-  });
-}
-
-function loadCustomers() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return initialCustomers;
-
-  try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) && parsed.length ? parsed : initialCustomers;
-  } catch (error) {
-    return initialCustomers;
-  }
-}
-
-function persistCustomers() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.customers));
-}
-
-function setView(viewName) {
-  state.view = viewName;
-  render();
-}
-
-function render() {
-  updateViewVisibility();
-  updateCustomerView();
-  updateAdminView();
-  updateMetrics();
-}
-
-function updateViewVisibility() {
-  const showLogout = state.view !== 'login';
-  els.logoutBtn.classList.toggle('hidden', !showLogout);
-
-  els.loginView.classList.toggle('active', state.view === 'login');
-  els.clientView.classList.toggle('active', state.view === 'client');
-  els.adminView.classList.toggle('active', state.view === 'admin');
-}
-
-function handleClientLogin() {
-  const rawPhone = els.phoneInput.value.trim();
-  const cleanPhone = normalizePhone(rawPhone);
-
-  if (!cleanPhone) {
-    alert('Informe um telefone válido.');
-    return;
+  .app-shell {
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
   }
 
-  const found = state.customers.find(
-    (customer) => normalizePhone(customer.phone) === cleanPhone
-  );
-
-  if (!found) {
-    alert('Telefone não encontrado no cadastro. Entre em contato com a Cortez Gás para se cadastrar!');
-    return;
+  .main-panel {
+    padding: 18px 14px 22px;
   }
-
-  state.currentCustomer = found;
-  setView('client');
 }
-
-function handleAdminLogin() {
-  const pin = els.adminPinInput.value.trim();
-
-  if (pin === ADMIN_PIN) {
-    els.pinError.classList.add('hidden');
-    els.adminPinInput.value = '';
-    setView('admin');
-    return;
-  }
-
-  els.pinError.classList.remove('hidden');
-}
-
-function handleCreateCustomer() {
-  const name = els.newCustomerName.value.trim();
-  const phone = normalizePhone(els.newCustomerPhone.value);
-  const address = els.newCustomerAddress.value.trim();
-
-  if (!name || !phone) {
-    alert('Informe nome e WhatsApp do cliente.');
-    return;
-  }
-
-  if (state.customers.some((customer) => normalizePhone(customer.phone) === phone)) {
-    alert('Este número já está cadastrado no sistema!');
-    return;
-  }
-
-  const newCustomer = {
-    id: String(Date.now()),
-    name,
-    phone,
-    address,
-    gasStamps: 0,
-    waterStamps: 0,
-    history: []
-  };
-
-  state.customers = [...state.customers, newCustomer];
-  persistCustomers();
-
-  state.selectedAdminCustomer = newCustomer;
-  els.newCustomerName.value = '';
-  els.newCustomerPhone.value = '';
-  els.newCustomerAddress.value = '';
-
-  alert('Cliente cadastrado com sucesso!');
-  render();
-}
-
-function handleUpdateStamps(type, amount) {
-  const target = state.selectedAdminCustomer;
-  if (!target) return;
-
-  const nextCustomers = state.customers.map((customer) => {
-    if (customer.id !== target.id) return customer;
-
-    const nextCustomer = {
-      ...customer,
-      gasStamps: customer.gasStamps,
-      waterStamps: customer.waterStamps,
-      history: [...customer.history]
-    };
-
-    if (type === 'gas') {
-      nextCustomer.gasStamps = clamp(customer.gasStamps + amount, 0, MAX_STAMPS);
-    }
-
-    if (type === 'water') {
-      nextCustomer.waterStamps = clamp(customer.waterStamps + amount, 0, MAX_STAMPS);
-    }
-
-    const now = new Date();
-    const dateStr = `${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })}`;
-
-    nextCustomer.history.unshift({
-      type,
-      action: amount > 0 ? 'add' : 'redeem',
-      count: Math.abs(amount),
-      date: dateStr
-    });
-
-    return nextCustomer;
-  });
-
-  state.customers = nextCustomers;
-  state.selectedAdminCustomer = state.customers.find(
-    (customer) => customer.id === target.id
-  ) || null;
-
-  if (state.currentCustomer && state.currentCustomer.id === target.id) {
-    state.currentCustomer = state.selectedAdminCustomer;
-  }
-
-  persistCustomers();
-  render();
-}
-
-function updateCustomerView() {
-  if (state.view !== 'client' || !state.currentCustomer) return;
-
-  const customer = state.currentCustomer;
-
-  els.clientName.textContent = customer.name;
-  els.clientAddress.textContent = customer.address || 'Endereço não cadastrado';
-
-  renderStampGrid('gas', customer.gasStamps, els.gasStamps);
-  renderStampGrid('water', customer.waterStamps, els.waterStamps);
-
-  els.gasProgressText.textContent = `${customer.gasStamps}/${MAX_STAMPS} Selos acumulados`;
-  els.waterProgressText.textContent = `${customer.waterStamps}/${MAX_STAMPS} Selos acumulados`;
-
-  const gasReady = customer.gasStamps >= MAX_STAMPS;
-  const waterReady = customer.waterStamps >= MAX_STAMPS;
-  els.gasRewardBadge.classList.toggle('hidden', !gasReady);
-  els.waterRewardBadge.classList.toggle('hidden', !waterReady);
-
-  const historyItems = customer.history.slice(0, 5);
-  if (!historyItems.length) {
-    els.historyList.innerHTML = '<p class="history-title">Nenhuma movimentação ainda.</p>';
-    return;
-  }
-
-  els.historyList.innerHTML = historyItems
-    .map((item) => {
-      const label = item.action === 'add' ? '➕ Selo adicionado' : '🎁 Prêmio resgatado';
-      const typeName = item.type === 'gas' ? 'Gás' : 'Água';
-      return `
-        <div class="history-item">
-          <span class="history-title">${label} (${typeName})</span>
-          <span class="history-date">${item.date}</span>
-        </div>
-      `;
-    })
-    .join('');
-
-  const message = `Olá Cortez Gás! Sou ${customer.name} e gostaria de fazer um pedido.`;
-  els.whatsappLink.href = `https://wa.me/5588999999999?text=${encodeURIComponent(message)}`;
-}
-
-function renderStampGrid(type, count, targetEl) {
-  const cells = [];
-
-  for (let index = 0; index < MAX_STAMPS; index += 1) {
-    const active = index < count;
-    const icon = type === 'gas' ? '🔥' : '💧';
-    const label = active ? icon : index + 1;
-
-    cells.push(`
-      <div class="stamp-box ${active ? 'active' : 'empty'}">
-        ${label}
-      </div>
-    `);
-  }
-
-  targetEl.innerHTML = cells.join('');
-}
-
-function updateAdminView() {
-  if (state.view !== 'admin') return;
-
-  const selected = state.selectedAdminCustomer;
-  renderCustomerList();
-
-  if (!selected) {
-    els.adminCustomerPanel.classList.add('hidden');
-    return;
-  }
-
-  els.adminCustomerPanel.classList.remove('hidden');
-  els.selectedCustomerName.textContent = selected.name;
-  els.selectedCustomerPhone.textContent = formatPhone(selected.phone);
-  els.selectedGasValue.textContent = `${selected.gasStamps}/${MAX_STAMPS}`;
-  els.selectedWaterValue.textContent = `${selected.waterStamps}/${MAX_STAMPS}`;
-}
-
-function renderCustomerList() {
-  const term = state.searchTerm.toLowerCase();
-
-  const filtered = state.customers.filter((customer) => {
-    const name = customer.name.toLowerCase();
-    const phone = customer.phone.toLowerCase();
-    return !term || name.includes(term) || phone.includes(term);
-  });
-
-  if (!filtered.length) {
-    els.customerList.innerHTML = '<p class="history-title">Nenhum cliente encontrado.</p>';
-    return;
-  }
-
-  els.customerList.innerHTML = filtered
-    .map((customer) => {
-      const isActive = state.selectedAdminCustomer && state.selectedAdminCustomer.id === customer.id;
-      return `
-        <button type="button" class="customer-item ${isActive ? 'active' : ''}" data-customer-id="${customer.id}">
-          <div class="customer-main">
-            <strong>${customer.name}</strong>
-            <span>${formatPhone(customer.phone)}</span>
-          </div>
-          <div class="customer-status">
-            Gás: ${customer.gasStamps}/10<br />
-            Água: ${customer.waterStamps}/10
-          </div>
-        </button>
-      `;
-    })
-    .join('');
-
-  els.customerList.querySelectorAll('[data-customer-id]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const id = button.dataset.customerId;
-      state.selectedAdminCustomer = state.customers.find((customer) => customer.id === id) || null;
-      render();
-    });
-  });
-}
-
-function updateMetrics() {
-  const totalClients = state.customers.length;
-  const totalGas = state.customers.reduce((sum, customer) => sum + customer.gasStamps, 0);
-  const totalWater = state.customers.reduce((sum, customer) => sum + customer.waterStamps, 0);
-  const prizeCount = state.customers.filter(
-    (customer) => customer.gasStamps >= MAX_STAMPS || customer.waterStamps >= MAX_STAMPS
-  ).length;
-
-  els.statClients.textContent = String(totalClients);
-  els.statGas.textContent = String(totalGas);
-  els.statWater.textContent = String(totalWater);
-  els.statPrizes.textContent = String(prizeCount);
-}
-
-function normalizePhone(value) {
-  return String(value || '').replace(/\D/g, '');
-}
-
-function formatPhone(phone) {
-  const digits = normalizePhone(phone);
-  if (digits.length !== 11) return digits || 'Sem telefone';
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  render();
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
