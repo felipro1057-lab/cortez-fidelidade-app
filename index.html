@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cortez Gás & Água | Fidelidade</title>
+    <meta
+      name="description"
+      content="Sistema de fidelidade digital para Cortez Gás & Água. Controle de selos, clientes e painel administrativo."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-icon">🔥</div>
+          <div>
+            <h1>Cortez</h1>
+            <p>Gás & Água Mineral</p>
+          </div>
+        </div>
+
+        <button id="logoutBtn" class="ghost-btn hidden" type="button">
+          Sair
+        </button>
+      </header>
+
+      <main class="main-panel">
+        <section id="loginView" class="view active">
+          <div class="hero-card">
+            <div class="eyebrow">Cartão Fidelidade</div>
+            <h2>Junte selos e ganhe descontos e brindes.</h2>
+            <p>
+              Acumule selos em gás e água e receba vantagens exclusivas ao atingir
+              a meta de 10 selos.
+            </p>
+          </div>
+
+          <div class="panel-box customer-box">
+            <div class="panel-title">
+              <span class="icon blue">👤</span>
+              <h3>Área do Cliente</h3>
+            </div>
+
+            <form id="clientLoginForm" class="stack-form">
+              <label>
+                <span>Seu WhatsApp</span>
+                <input
+                  id="phoneInput"
+                  type="tel"
+                  inputmode="numeric"
+                  placeholder="Ex: 88999998888"
+                  maxlength="11"
+                  required
+                />
+              </label>
+
+              <button type="submit" class="primary-btn wide-btn">
+                Entrar no meu cartão
+              </button>
+            </form>
+          </div>
+
+          <div class="panel-box admin-box">
+            <div class="panel-title">
+              <span class="icon amber">🛡️</span>
+              <h3>Painel Administrativo</h3>
+            </div>
+
+            <form id="adminLoginForm" class="stack-form">
+              <label>
+                <span>PIN de acesso</span>
+                <input
+                  id="adminPinInput"
+                  type="password"
+                  placeholder="Padrão: 1234"
+                  maxlength="6"
+                />
+              </label>
+
+              <button type="submit" class="secondary-btn wide-btn">Entrar como administrador</button>
+              <p id="pinError" class="error-message hidden">PIN incorreto. Tente 1234.</p>
+            </form>
+          </div>
+        </section>
+
+        <section id="clientView" class="view">
+          <div id="clientWelcomeCard" class="welcome-card">
+            <p>Bem-vindo(a),</p>
+            <h2 id="clientName">Cliente</h2>
+            <div class="address-row">
+              <span>📍</span>
+              <p id="clientAddress">Endereço não cadastrado</p>
+            </div>
+          </div>
+
+          <div class="card loyalty-card gas-card">
+            <div class="card-header">
+              <div>
+                <span class="tag">Fidelidade Gás</span>
+                <h3>Botijão de Gás</h3>
+              </div>
+              <span class="card-icon">🔥</span>
+            </div>
+
+            <p class="card-copy">Complete 10 selos e ganhe 1 recarga de gás grátis!</p>
+
+            <div id="gasStamps" class="stamps-grid"></div>
+
+            <div class="stamp-meta">
+              <span id="gasProgressText">0/10 Selos acumulados</span>
+              <span id="gasRewardBadge" class="reward-badge hidden">Prêmio disponível</span>
+            </div>
+          </div>
+
+          <div class="card loyalty-card water-card">
+            <div class="card-header">
+              <div>
+                <span class="tag">Fidelidade Água</span>
+                <h3>Garrafão de Água</h3>
+              </div>
+              <span class="card-icon">💧</span>
+            </div>
+
+            <p class="card-copy">Complete 10 selos e ganhe 1 garrafão de água grátis!</p>
+
+            <div id="waterStamps" class="stamps-grid"></div>
+
+            <div class="stamp-meta">
+              <span id="waterProgressText">0/10 Selos acumulados</span>
+              <span id="waterRewardBadge" class="reward-badge hidden">Prêmio disponível</span>
+            </div>
+          </div>
+
+          <a id="whatsappLink" class="whatsapp-btn" href="#" target="_blank" rel="noreferrer noopener">
+            Pedir pelo WhatsApp
+          </a>
+
+          <div class="card history-card">
+            <div class="panel-title compact">
+              <span class="icon grey">🕘</span>
+              <h3>Histórico recente</h3>
+            </div>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </section>
+
+        <section id="adminView" class="view">
+          <div class="admin-banner">
+            <span class="icon amber">🛡️</span>
+            <h3>Painel do Administrador</h3>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span>Clientes</span>
+              <strong id="statClients">0</strong>
+            </div>
+            <div class="stat-card gas">
+              <span>Selos Gás</span>
+              <strong id="statGas">0</strong>
+            </div>
+            <div class="stat-card water">
+              <span>Selos Água</span>
+              <strong id="statWater">0</strong>
+            </div>
+            <div class="stat-card prize">
+              <span>Prêmios prontos</span>
+              <strong id="statPrizes">0</strong>
+            </div>
+          </div>
+
+          <div class="admin-section">
+            <label class="section-label">Selecionar ou buscar cliente</label>
+            <input
+              id="searchCustomerInput"
+              type="text"
+              placeholder="Buscar por nome ou telefone..."
+            />
+
+            <div id="customerList" class="customer-list"></div>
+          </div>
+
+          <div id="adminCustomerPanel" class="card customer-control hidden">
+            <div class="customer-details-header">
+              <div>
+                <span class="mini-tag">Cliente selecionado</span>
+                <h3 id="selectedCustomerName">Nome</h3>
+                <p id="selectedCustomerPhone">Telefone</p>
+              </div>
+              <button id="deleteCustomerBtn" class="danger-btn" type="button">Excluir</button>
+            </div>
+
+            <div class="control-section">
+              <div class="control-header">
+                <span class="stamp-name gas-name">Selos de Gás</span>
+                <strong id="selectedGasValue">0/10</strong>
+              </div>
+              <div class="action-grid">
+                <button class="add-btn gas-btn" data-type="gas" data-amount="1" type="button">+1 Selo</button>
+                <button class="redeem-btn" data-type="gas" data-amount="-10" type="button">Resgatar prêmio</button>
+              </div>
+            </div>
+
+            <div class="control-section">
+              <div class="control-header">
+                <span class="stamp-name water-name">Selos de Água</span>
+                <strong id="selectedWaterValue">0/10</strong>
+              </div>
+              <div class="action-grid">
+                <button class="add-btn water-btn" data-type="water" data-amount="1" type="button">+1 Selo</button>
+                <button class="redeem-btn" data-type="water" data-amount="-10" type="button">Resgatar prêmio</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card register-card">
+            <div class="panel-title compact">
+              <span class="icon grey">➕</span>
+              <h3>Cadastrar novo cliente</h3>
+            </div>
+
+            <form id="createCustomerForm" class="stack-form compact-form">
+              <input id="newCustomerName" type="text" placeholder="Nome do cliente" required />
+              <input id="newCustomerPhone" type="tel" placeholder="WhatsApp (Ex: 88999998888)" required />
+              <input id="newCustomerAddress" type="text" placeholder="Endereço completo" />
+              <button type="submit" class="primary-btn wide-btn">Salvar cadastro</button>
+            </form>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">Cortez Gás & Água © 2026 • Fidelidade Digital</footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
